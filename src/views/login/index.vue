@@ -111,33 +111,46 @@ export default defineComponent({
       ),
       loginForm: ref(null),
       submit: () => {
+        //避免重复点击-如果正在加载中，则直接返回停止
         if (state.loading) {
           return
         }
         state.loginForm.validate(async valid => {
+          //如果表单验证通过
           if (valid) {
+            //开始加载层
             state.loading = true
+            //发送ajax请求，完成登录
             const { code, data, message } = await Login(state.model)
             if (+code === 200) {
+              //登录成功
+
+              //提示消息
               ctx.$message.success({
                 message: ctx.$t('login.loginsuccess'),
                 duration: 1000,
               })
 
+              //获取路径中的redirect参数，去上一个页面
               const targetPath = decodeURIComponent(route.query.redirect)
               if (targetPath.startsWith('http')) {
-                // 如果是一个url地址
+                // 如果路径是http开头，则直接跳转过去
                 window.location.href = targetPath
               } else if (targetPath.startsWith('/')) {
-                // 如果是内部路由地址
+                // 如果是/开头，则使用路由跳转到当前项目的页面
                 router.push(targetPath)
               } else {
+                // 否则跳转到当前项目的首页
                 router.push('/')
               }
+
+              //将响应的数据data（token令牌），保存到localStorage对象中，浏览器保存了
               useApp().initToken(data)
             } else {
+              //登录失败的提示
               ctx.$message.error(message)
             }
+            //关闭加载层
             state.loading = false
           }
         })

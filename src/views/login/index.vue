@@ -59,8 +59,9 @@ import {
   ref,
   computed,
   watch,
+  onMounted,
 } from 'vue'
-import { Login } from '@/api/login'
+import { Login, GetCaptcha } from '@/api/login'
 import { useRouter, useRoute } from 'vue-router'
 import ChangeLang from '@/layout/components/Topbar/ChangeLang.vue'
 import useLang from '@/i18n/useLang'
@@ -99,10 +100,19 @@ export default defineComponent({
         },
       ],
     })
+
+    //钩子函数onMounted, 页面打开后马上执行
+    onMounted(()=>{
+        //发送ajax请求，获取图片验证码
+        state.getValidateCode()
+    })
+
     const state = reactive({
       model: {
         userName: 'admin',
         password: '111111',
+        codeKey: '',
+        codeValue: ''
       },
       rules: getRules(),
       loading: false,
@@ -110,6 +120,19 @@ export default defineComponent({
         state.loading ? ctx.$t('login.logining') : ctx.$t('login.login')
       ),
       loginForm: ref(null),
+      getValidateCode: async ()=>{
+          //发送ajax请求，获取图片验证码
+          const { code, data, message } = await GetCaptcha()
+          if(code === 200){
+            //验证码对应的key
+            state.model.codeKey = data.codeKey
+            //验证码的图片
+            state.model.codeValue = data.codeValue
+          }else{
+            //错误提示
+            ctx.$message.error(message)
+          }
+      },
       submit: () => {
         //避免重复点击-如果正在加载中，则直接返回停止
         if (state.loading) {

@@ -11,10 +11,13 @@
  */
 import request from '@/utils/request'
 
+// 后台登录接口
+const API = '/admin/system/index';
+
 // 登录接口
 export const Login = data => {
   return request({
-    url: '/admin/system/index/login',
+    url: `${API}/login`,
     method: 'post',
     data,
   })
@@ -23,7 +26,7 @@ export const Login = data => {
 // 获取登录用户信息
 export const GetUserinfo = () => {
   return request({
-    url: '/admin/system/index/getUserInfo',
+    url: `${API}/getUserInfo`,
     method: 'get',
   })
 }
@@ -31,7 +34,15 @@ export const GetUserinfo = () => {
 // 退出
 export const Logout = () => {
   return request({
-    url: '/admin/system/index/logout',
+    url: `${API}/logout`,
+    method: 'get',
+  })
+}
+
+// 获取图片验证码
+export const GetCaptcha = () => {
+  return request({
+    url: `${API}/getCaptcha`,
     method: 'get',
   })
 }

@@ -60,7 +60,18 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   // 响应成功进入第1个函数，该函数的参数是响应对象
   response => {
-    return response.data
+    const res = response.data
+    if (res.code == 208) {
+      // 当前地址栏的url
+      const redirect = encodeURIComponent(window.location.href)  
+      // 跳转到登录页面
+      router.push(`/login?redirect=${redirect}`)
+      // 错误提示
+      ElMessage.error(res.message);
+      // 中断程序
+      return Promise.reject(new Error(res.message || 'Error'))
+    }
+    return res
   },
   // 响应失败进入第2个函数，该函数的参数是错误对象
   async error => {

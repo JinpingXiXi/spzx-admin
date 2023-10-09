@@ -27,3 +27,11 @@ export const GetUserinfo = () => {
     method: 'get',
   })
 }
+
+// 退出
+export const Logout = () => {
+  return request({
+    url: '/admin/system/index/logout',
+    method: 'get',
+  })
+}

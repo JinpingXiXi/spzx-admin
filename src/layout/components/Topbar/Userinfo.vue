@@ -74,6 +74,7 @@ import { useRouter } from 'vue-router'
 import { useUserinfo } from '@/components/Avatar/hooks/useUserinfo'
 import LockModal from './LockModal.vue'
 import { useApp } from '@/pinia/modules/app'
+import { Logout } from '@/api/login'
 
 export default defineComponent({
   components: {
@@ -85,9 +86,13 @@ export default defineComponent({
     const { userinfo } = useUserinfo()
 
     // 退出
-    const logout = () => {
-      // 清除token
+    const logout = async () => {
+      // 发送ajax请求后端d的退出接口
+      await Logout()
+
+      // 清除localStorage中保存的token令牌
       useApp().clearToken()
+      // 跳转到登录页面
       router.push('/login')
     }
 

@@ -35,7 +35,7 @@ import router from '@/router'
 import { useApp } from '@/pinia/modules/app'
 
 const service = axios.create({
-  baseURL: '/', //所有ajax请求的前缀
+  baseURL: 'http://localhost:8501', //所有ajax请求的前缀
   timeout: 10000,
   withCredentials: true,
 })

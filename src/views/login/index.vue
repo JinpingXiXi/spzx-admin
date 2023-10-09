@@ -188,6 +188,8 @@ export default defineComponent({
               //将响应的数据data（token令牌），保存到localStorage对象中，浏览器保存了
               useApp().initToken(data)
             } else {
+              //重新加载验证码
+              state.getValidateCode()
               //登录失败的提示
               ctx.$message.error(message)
             }

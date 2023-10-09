@@ -102,7 +102,7 @@ export default defineComponent({
     const state = reactive({
       model: {
         userName: 'admin',
-        password: '123456',
+        password: '111111',
       },
       rules: getRules(),
       loading: false,

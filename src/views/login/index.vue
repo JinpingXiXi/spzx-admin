@@ -32,6 +32,18 @@
           :placeholder="$t('login.password')"
         />
       </el-form-item>
+      <el-form-item prop="captcha">
+        <div class="captcha">
+          <el-input
+            class="text"
+            v-model="model.captcha"
+            prefix-icon="Picture"
+            clearable
+            :placeholder="$t('login.captcha')"
+          />
+          <img :src="model.codeValue" @click="getValidateCode" />
+        </div>
+      </el-form-item>
       <el-form-item>
         <el-button
           :loading="loading"
@@ -39,9 +51,7 @@
           class="btn"
           size="large"
           @click="submit"
-        >
-          {{ btnText }}
-        </el-button>
+        >{{ btnText }}</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -99,20 +109,28 @@ export default defineComponent({
           trigger: 'blur',
         },
       ],
+      captcha: [
+        {
+          required: true,
+          message: ctx.$t('login.rules-captcha'),
+          trigger: 'blur',
+        }
+      ],
     })
 
     //钩子函数onMounted, 页面打开后马上执行
-    onMounted(()=>{
-        //发送ajax请求，获取图片验证码
-        state.getValidateCode()
+    onMounted(() => {
+      //发送ajax请求，获取图片验证码
+      state.getValidateCode()
     })
 
     const state = reactive({
       model: {
         userName: 'admin',
         password: '111111',
-        codeKey: '',
-        codeValue: ''
+        codeKey: '', //验证码对应的key
+        codeValue: '', //验证码的图片base64
+        captcha: '', //输入框填写的验证码
       },
       rules: getRules(),
       loading: false,
@@ -120,18 +138,18 @@ export default defineComponent({
         state.loading ? ctx.$t('login.logining') : ctx.$t('login.login')
       ),
       loginForm: ref(null),
-      getValidateCode: async ()=>{
-          //发送ajax请求，获取图片验证码
-          const { code, data, message } = await GetCaptcha()
-          if(code === 200){
-            //验证码对应的key
-            state.model.codeKey = data.codeKey
-            //验证码的图片
-            state.model.codeValue = data.codeValue
-          }else{
-            //错误提示
-            ctx.$message.error(message)
-          }
+      getValidateCode: async () => {
+        //发送ajax请求，获取图片验证码
+        const { code, data, message } = await GetCaptcha()
+        if (code === 200) {
+          //验证码对应的key
+          state.model.codeKey = data.codeKey
+          //验证码的图片
+          state.model.codeValue = 'data:image/png;base64,' + data.codeValue
+        } else {
+          //错误提示
+          ctx.$message.error(message)
+        }
       },
       submit: () => {
         //避免重复点击-如果正在加载中，则直接返回停止
@@ -252,5 +270,17 @@ export default defineComponent({
       }
     }
   }
+}
+.captcha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.captcha img {
+  cursor: pointer;
+  margin-left: 10px;
+  width: 220px;
 }
 </style>

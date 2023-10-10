@@ -20,3 +20,12 @@ export const AddRole = (sysRole) => {
     data: sysRole,
   })
 }
+
+// 修改
+export const UpdateRole = (sysRole) => {
+  return request({
+    url: `${API}/update`,
+    method: 'put',
+    data: sysRole,
+  })
+}

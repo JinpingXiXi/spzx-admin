@@ -64,7 +64,7 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import { FindRoleListByPage, AddRole } from '@/api/sysRole'
+import { FindRoleListByPage, AddRole, UpdateRole } from '@/api/sysRole'
 
 //弹窗是否显示
 let dialogVisible = ref(false)
@@ -91,7 +91,7 @@ onMounted(() => {
 })
 
 //显示修改的窗口
-const showUpdate = (row) => {
+const showUpdate = row => {
   //显示窗口、修改标题、回显数据
   dialogVisible.value = true
   dialogTitle.value = '修改角色'
@@ -100,18 +100,24 @@ const showUpdate = (row) => {
   //sysRole.value = row
 
   //复制row对象的所有属性 给sysRole对象
-  sysRole.value = {...row}
+  sysRole.value = { ...row }
 }
 
 //弹窗的提交按钮
 const submit = async () => {
-  const { code, message } = await AddRole(sysRole.value)
+  //判断是否有id
+  if (sysRole.value.id) {
+    //有id，执行修改
+    var { code } = await UpdateRole(sysRole.value)
+  } else {
+    //没有id，执行添加
+    var { code } = await AddRole(sysRole.value)
+  }
+
   if (code === 200) {
-    ElMessage.success('添加成功')
+    ElMessage.success('操作成功')
     dialogVisible.value = false
     fetchData()
-  } else {
-    ElMessage.error(message)
   }
 }
 

@@ -14,7 +14,7 @@
 
   <!-- 添加按钮 -->
   <div class="tools-div">
-    <el-button type="success" size="small">添 加</el-button>
+    <el-button type="success" size="small" @click="showAdd">添 加</el-button>
   </div>
 
   <!--- 角色表格数据 -->
@@ -38,12 +38,39 @@
     @size-change="fetchData"
     @current-change="fetchData"
   />
+
+  <!-- 添加角色表单对话框 -->
+  <el-dialog v-model="dialogVisible" :title="dialogTitle" width="30%">
+    <el-form label-width="120px">
+      <el-form-item label="角色名称">
+        <el-input v-model="sysRole.roleName"/>
+      </el-form-item>
+      <el-form-item label="角色编码">
+        <el-input v-model="sysRole.roleCode"/>
+      </el-form-item>
+      <el-form-item label="角色描述">
+        <el-input v-model="sysRole.description"/>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit">提交</el-button>
+        <el-button @click="dialogVisible = false">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
   
 <script setup>
 import { onMounted, ref } from 'vue'
-import { FindRoleListByPage } from '@/api/sysRole'
 import { ElMessage } from 'element-plus'
+
+import { FindRoleListByPage, AddRole } from '@/api/sysRole'
+
+//弹窗是否显示
+let dialogVisible = ref(false)
+//弹窗的标题
+let dialogTitle = ref('添加获取修改角色')
+//弹窗绑定的对象
+let sysRole = ref({})
 
 // 分页条总记录数
 let total = ref(0)
@@ -61,6 +88,26 @@ onMounted(() => {
   //获取角色列表
   fetchData()
 })
+
+//弹窗的提交按钮
+const submit = async ()=>{
+    const { code, message } = await AddRole(sysRole.value)
+    if(code === 200){
+        ElMessage.success("添加成功")
+        dialogVisible.value = false
+        fetchData()
+    }else{
+        ElMessage.error(message)
+    }
+}
+
+//显示添加的窗口
+const showAdd = () => {
+  //显示窗口、修改标题、清空表单
+  dialogVisible.value = true
+  dialogTitle.value = '添加角色'
+  sysRole.value = {}
+}
 
 //获取角色列表
 const fetchData = async () => {

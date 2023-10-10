@@ -29,3 +29,11 @@ export const UpdateRole = (sysRole) => {
     data: sysRole,
   })
 }
+
+// 逻辑删除
+export const DeleteRole = (id) => {
+  return request({
+    url: `${API}/delete/${id}`,
+    method: 'delete',
+  })
+}

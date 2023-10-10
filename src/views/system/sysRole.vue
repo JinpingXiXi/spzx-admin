@@ -25,7 +25,7 @@
     <el-table-column prop="createTime" label="创建时间" />
     <el-table-column label="操作" align="center" width="280" #default="scope">
       <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
-      <el-button type="danger" size="small">删除</el-button>
+      <el-button type="danger" size="small" @click="deleteById(scope.row.id)">删除</el-button>
     </el-table-column>
   </el-table>
 
@@ -62,9 +62,14 @@
   
 <script setup>
 import { onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-import { FindRoleListByPage, AddRole, UpdateRole } from '@/api/sysRole'
+import {
+  FindRoleListByPage,
+  AddRole,
+  UpdateRole,
+  DeleteRole,
+} from '@/api/sysRole'
 
 //弹窗是否显示
 let dialogVisible = ref(false)
@@ -89,6 +94,27 @@ onMounted(() => {
   //获取角色列表
   fetchData()
 })
+
+//逻辑删除
+const deleteById = async id => {
+  ElMessageBox.confirm(
+    '此操作将删除该数据. 确定?',
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(async () => {
+        const { code } = await DeleteRole(id)
+        if (code === 200) {
+            ElMessage.success('删除成功')
+            fetchData()
+        }
+    })
+    .catch(() => {})
+}
 
 //显示修改的窗口
 const showUpdate = row => {

@@ -5,7 +5,10 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="关键字">
-            <el-input v-model="queryDto.keyword" style="width: 100%" placeholder="用户名、姓名、手机号码"></el-input>
+            <el-input 
+                v-model="queryDto.keyword" 
+                style="width: 100%" 
+                placeholder="用户名、姓名、手机号码"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -31,8 +34,42 @@
 
   <!--添加按钮-->
   <div class="tools-div">
-    <el-button type="success" size="small">添 加</el-button>
+    <el-button type="success" size="small" @Click="addShow">添加</el-button>
   </div>
+
+  <el-dialog v-model="dialogVisible" title="添加或修改" width="40%">
+        <el-form label-width="120px">
+            <el-form-item label="用户名">
+                <el-input v-model="sysUser.userName"/>
+            </el-form-item>
+            <el-form-item v-if="sysUser.id == null" label="密码">
+                <el-input type="password" show-password v-model="sysUser.password"/>
+            </el-form-item>
+            <el-form-item label="姓名">
+                <el-input v-model="sysUser.name"/>
+            </el-form-item>
+            <el-form-item label="手机">
+                <el-input v-model="sysUser.phone"/>
+            </el-form-item>
+            <el-form-item label="头像">
+                <el-upload
+                        class="avatar-uploader"
+                        action="http://localhost:8501/admin/system/file/upload"
+                        :show-file-list="false"
+                        >
+                    <img v-if="sysUser.avatar" :src="sysUser.avatar" class="avatar" />
+                    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                </el-upload>
+            </el-form-item>
+            <el-form-item label="描述">
+                <el-input  v-model="sysUser.description"/>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="submit">提交</el-button>
+                <el-button @click="dialogVisible = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog> 
 
   <!---数据表格-->
   <el-table :data="list" style="width: 100%">
@@ -49,9 +86,9 @@
       #default="scope"
     >{{ scope.row.status == 1 ? '正常' : '停用' }}</el-table-column>
     <el-table-column prop="createTime" label="创建时间" />
-    <el-table-column label="操作" align="center" width="280">
-      <el-button type="primary" size="small">修改</el-button>
-      <el-button type="danger" size="small">删除</el-button>
+    <el-table-column label="操作" align="center" width="280" #default="scope">
+      <el-button type="primary" size="small" @click="editSysUser(scope.row)">修改</el-button>
+      <el-button type="danger" size="small" @click="deleteById(scope.row)" >删除</el-button>
       <el-button type="warning" size="small">分配角色</el-button>
     </el-table-column>
   </el-table>
@@ -70,7 +107,8 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { FindUserListByPage } from '@/api/sysUser'
+import { deleteSysUserById, FindUserListByPage, SaveSysUser, UpdateSysUser } from '@/api/sysUser'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 表格数据模型
 const list = ref([])
@@ -114,9 +152,82 @@ const fetchData = async ()=>{
     total.value = data.total;
   }
 }
+
+//===================================for add user
+
+// 添加表单对话框显示隐藏控制变量
+const dialogVisible = ref(false)
+const addShow = () => {
+    sysUser.value = {}
+    dialogVisible.value = true 
+}
+
+// 定义提交表单数据模型
+const defaultForm = {
+    userName:"",
+    name: "" ,
+    phone: "" ,
+    password: "" ,
+    description:"",
+    avatar: ""
+}
+const sysUser = ref(defaultForm)
+
+// 提交按钮事件处理函数
+const submit = async () => {
+    if(!sysUser.value.id){ //checks if the sysUser had property: id,
+                                //inside this if is the new user creation process
+        const {code , message , data} = await SaveSysUser(sysUser.value) 
+        if(code === 200) {
+            dialogVisible.value = false
+            ElMessage.success('操作成功')
+            fetchData()
+        }else {
+            ElMessage.error(message)
+        }
+    }else{
+        //this is an existing user, load user data back onto the chart
+        console.log("existing user!!!")
+        const {code,message,data} = await UpdateSysUser(sysUser.value)
+        if(code===200){
+            dialogVisible.value=false
+            ElMessage.success("操作成功")
+            fetchData()
+        }else{
+            ElMessage.error(message)
+        }
+    }
+
+}
+
+// 修改按钮点击事件处理函数
+const editSysUser = (row) => {
+    dialogVisible.value = true
+    sysUser.value = {...row}
+}
+// 删除用戶
+const deleteById = (row) =>{
+    ElMessageBox.confirm(
+        'im gonna delete this user, but in fact im not, Are you sure?',
+        'Warning',{
+        confirmButtonText: 'YES',
+        cancelButtonText: 'HELL NO',
+        type: 'warning',
+    }).then(async()=>{
+        const{code}=await deleteSysUserById(row.id)
+        if(code===200){
+            ElMessage.success("SUCCESSFUL DELETE USER")
+            fetchData()
+        }
+    }).catch(()=>{ElMessage.info("OPEATION CANCELED")})
+        
+}
+
 </script>
 
+
 <style scoped>
+
 .search-div {
   margin-bottom: 10px;
   padding: 10px;
@@ -132,6 +243,8 @@ const fetchData = async ()=>{
   background-color: #fff;
 }
 </style>
+
+
 <style scoped>
 .avatar-uploader .avatar {
   width: 178px;
@@ -162,3 +275,8 @@ const fetchData = async ()=>{
   text-align: center;
 }
 </style>
+
+//=========================================
+
+
+

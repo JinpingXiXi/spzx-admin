@@ -20,10 +20,11 @@
   <!--- 角色表格数据 -->
   <el-table :data="list" style="width: 100%">
     <el-table-column prop="roleName" label="角色名称" width="180" />
-    <el-table-column prop="roleCode" label="角色code" width="180" />
+    <el-table-column prop="roleCode" label="角色编码" width="180" />
+    <el-table-column prop="description" label="角色描述" width="180" />
     <el-table-column prop="createTime" label="创建时间" />
-    <el-table-column label="操作" align="center" width="280">
-      <el-button type="primary" size="small">修改</el-button>
+    <el-table-column label="操作" align="center" width="280" #default="scope">
+      <el-button type="primary" size="small" @click="showUpdate(scope.row)">修改</el-button>
       <el-button type="danger" size="small">删除</el-button>
     </el-table-column>
   </el-table>
@@ -43,13 +44,13 @@
   <el-dialog v-model="dialogVisible" :title="dialogTitle" width="30%">
     <el-form label-width="120px">
       <el-form-item label="角色名称">
-        <el-input v-model="sysRole.roleName"/>
+        <el-input v-model="sysRole.roleName" />
       </el-form-item>
       <el-form-item label="角色编码">
-        <el-input v-model="sysRole.roleCode"/>
+        <el-input v-model="sysRole.roleCode" />
       </el-form-item>
       <el-form-item label="角色描述">
-        <el-input v-model="sysRole.description"/>
+        <el-input v-model="sysRole.description" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submit">提交</el-button>
@@ -89,16 +90,29 @@ onMounted(() => {
   fetchData()
 })
 
+//显示修改的窗口
+const showUpdate = (row) => {
+  //显示窗口、修改标题、回显数据
+  dialogVisible.value = true
+  dialogTitle.value = '修改角色'
+
+  //将sysRole对象的内存地址 指向 row对象的内存地址
+  //sysRole.value = row
+
+  //复制row对象的所有属性 给sysRole对象
+  sysRole.value = {...row}
+}
+
 //弹窗的提交按钮
-const submit = async ()=>{
-    const { code, message } = await AddRole(sysRole.value)
-    if(code === 200){
-        ElMessage.success("添加成功")
-        dialogVisible.value = false
-        fetchData()
-    }else{
-        ElMessage.error(message)
-    }
+const submit = async () => {
+  const { code, message } = await AddRole(sysRole.value)
+  if (code === 200) {
+    ElMessage.success('添加成功')
+    dialogVisible.value = false
+    fetchData()
+  } else {
+    ElMessage.error(message)
+  }
 }
 
 //显示添加的窗口

@@ -7,7 +7,7 @@
       </el-form-item>
       <el-row style="display:flex">
         <el-button type="primary" size="small" @click="fetchData">搜索</el-button>
-        <el-button size="small">重置</el-button>
+        <el-button size="small" @click="reset">重置</el-button>
       </el-row>
     </el-form>
   </div>
@@ -94,6 +94,12 @@ onMounted(() => {
   //获取角色列表
   fetchData()
 })
+
+//重置
+const reset = ()=>{
+  queryDto.value = {}
+  fetchData()
+}
 
 //逻辑删除
 const deleteById = async id => {

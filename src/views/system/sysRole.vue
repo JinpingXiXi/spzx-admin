@@ -3,10 +3,10 @@
     <!-- 搜索表单 -->
     <el-form label-width="70px" size="small">
       <el-form-item label="角色名称">
-        <el-input style="width: 100%" placeholder="角色名称"></el-input>
+        <el-input style="width: 100%" placeholder="角色名称" v-model="queryDto.roleName"></el-input>
       </el-form-item>
       <el-row style="display:flex">
-        <el-button type="primary" size="small">搜索</el-button>
+        <el-button type="primary" size="small" @click="fetchData">搜索</el-button>
         <el-button size="small">重置</el-button>
       </el-row>
     </el-form>
@@ -30,9 +30,13 @@
 
   <!--分页条-->
   <el-pagination
-    :page-sizes="[10, 20, 50, 100]"
-    layout="total, sizes, prev, pager, next"
+    v-model:current-page="pageNum"
+    v-model:page-size="pageSize"
+    :page-sizes="[5, 10, 15, 20]"
+    layout="total, sizes, prev, pager, next, jumper"
     :total="total"
+    @size-change="fetchData"
+    @current-change="fetchData"
   />
 </template>
   
@@ -50,7 +54,7 @@ let pageNum = ref(1)
 // 每页行数
 let pageSize = ref(5)
 //查询条件
-let queryDto = ref({roleName:''})
+let queryDto = ref({ roleName: '' })
 
 // 钩子函数onMounted，页码打开后马上执行
 onMounted(() => {
@@ -61,10 +65,15 @@ onMounted(() => {
 //获取角色列表
 const fetchData = async () => {
   //发送ajax请求
-  const {code,message,data} = await FindRoleListByPage(pageNum.value, pageSize.value, queryDto.value)
-  if(code === 200){
+  const { code, message, data } = await FindRoleListByPage(
+    pageNum.value,
+    pageSize.value,
+    queryDto.value
+  )
+  if (code === 200) {
     list.value = data.list
-  }else{
+    total.value = data.total
+  } else {
     ElMessage.error(message)
   }
 }

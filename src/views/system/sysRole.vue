@@ -36,27 +36,38 @@
   />
 </template>
   
-  <script setup>
-import { ref } from 'vue'
+<script setup>
+import { onMounted, ref } from 'vue'
+import { FindRoleListByPage } from '@/api/sysRole'
+import { ElMessage } from 'element-plus'
 
 // 分页条总记录数
 let total = ref(0)
-
 // 定义表格数据模型
-let list = ref([
-  {
-    id: 9,
-    roleName: '系统管理员',
-    roleCode: 'xtgly',
-    createTime: '2023-07-31',
-  },
-  {
-    id: 10,
-    roleName: '商品管理员',
-    roleCode: 'spgly',
-    createTime: '2023-07-31',
-  },
-])
+let list = ref([])
+// 当前页码
+let pageNum = ref(1)
+// 每页行数
+let pageSize = ref(5)
+//查询条件
+let queryDto = ref({roleName:''})
+
+// 钩子函数onMounted，页码打开后马上执行
+onMounted(() => {
+  //获取角色列表
+  fetchData()
+})
+
+//获取角色列表
+const fetchData = async () => {
+  //发送ajax请求
+  const {code,message,data} = await FindRoleListByPage(pageNum.value, pageSize.value, queryDto.value)
+  if(code === 200){
+    list.value = data.list
+  }else{
+    ElMessage.error(message)
+  }
+}
 </script>
   
   <style scoped>

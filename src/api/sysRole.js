@@ -37,3 +37,20 @@ export const DeleteRole = (id) => {
     method: 'delete',
   })
 }
+
+// 查询所有的角色数据
+export const GetAllRoleList = () => {
+    return request({
+        url: '/admin/system/sysRole/findAll',
+        method: 'get'
+    })
+}
+
+// 给用户分配角色请求
+export const DoAssignRoleToUser = (assginRoleVo) => {
+    return request({
+        url: "/admin/system/sysRoleUser/doAssign",
+        method: 'post',
+        data: assginRoleVo
+    })
+}
